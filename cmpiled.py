@@ -138,7 +138,7 @@ class MotorPIDController:
 
         output = max(min(output, 255), -255)
 
-        base_speed = 150
+        base_speed = 200
 
         left_speed = base_speed + output
         right_speed = base_speed - output
