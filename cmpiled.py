@@ -13,108 +13,55 @@ class ComplementaryFilterIMU:
     def __init__(self, bus_num=1, addr=0x68):
         self.bus_num = bus_num
         self.addr = addr
+        self.bus = smbus2.SMBus(bus_num)
+        self.PWR_MGMT_1 = 0x6B
+        self.GYRO_ZOUT_H = 0x47
         self.init_imu()
-
-        self.gyro_scale = 131.0
-        self.accel_scale = 16384.0
-
-        self.angle = 0.0
+        self.yaw = 0
         self.alpha = 0.98
-        self.dt = 0.01  # 10 ms loop time
-
         self.last_time = time.time()
 
     def init_imu(self):
         try:
-            self.bus = smbus2.SMBus(self.bus_num)
-            # Wake up MPU6500
-            self.bus.write_byte_data(self.addr, 0x6B, 0)
+            self.bus.write_byte_data(self.addr, self.PWR_MGMT_1, 0)
+            time.sleep(0.1)
+            print("IMU initialized")
         except Exception as e:
-            print(f"[IMU INIT ERROR] {e}")
-            self.bus = None
+            print(f"IMU initialization failed: {e}")
 
     def read_raw_data(self, reg):
-        if not self.bus:
-            raise IOError("I2C bus not initialized")
-        high = self.bus.read_byte_data(self.addr, reg)
-        low = self.bus.read_byte_data(self.addr, reg + 1)
-        value = (high << 8) | low
-        if value > 32768:
-            value -= 65536
-        return value
+        try:
+            high = self.bus.read_byte_data(self.addr, reg)
+            low = self.bus.read_byte_data(self.addr, reg + 1)
+            value = (high << 8) | low
+            if value > 32767:
+                value -= 65536
+            return value
+        except Exception as e:
+            print(f"IMU read error at reg {hex(reg)}: {e}")
+            # Try re-initialize IMU
+            self.init_imu()
+            raise e  # re-raise so caller knows
 
     def get_yaw(self):
         try:
             current_time = time.time()
             dt = current_time - self.last_time
-            if dt <= 0:
-                dt = self.dt
             self.last_time = current_time
 
-            # Gyro Z axis raw data
-            gz = self.read_raw_data(0x43 + 4)  # GYRO_ZOUT_H = 0x47
-            gz_rate = gz / self.gyro_scale  # degrees per second
+            gz = self.read_raw_data(self.GYRO_ZOUT_H)
+            gyro_rate = gz / 131.0  # scale factor for MPU gyro
 
-            # Integrate gyro
-            gyro_angle = self.angle + gz_rate * dt
+            # Integrate gyro to get delta angle
+            delta_angle = gyro_rate * dt
 
-            # Complementary filter (mostly gyro for yaw)
-            self.angle = self.alpha * gyro_angle + (1 - self.alpha) * self.angle
+            # Complementary filter combining gyro and accelerometer (simplified here)
+            self.yaw = self.alpha * (self.yaw + delta_angle) + (1 - self.alpha) * self.yaw
 
-            return self.angle
+            return self.yaw
         except Exception as e:
-            print(f"[IMU ERROR] {e}, attempting to reinitialize IMU...")
-            self.init_imu()
-            # On error, return last known angle to avoid crash
-            return self.angle
-
-    def __init__(self, bus_num=1, addr=0x68):
-        self.bus = smbus2.SMBus(bus_num)
-        self.addr = addr
-        # MPU6500 registers
-        self.PWR_MGMT_1 = 0x6B
-        self.GYRO_XOUT_H = 0x43
-        self.ACCEL_XOUT_H = 0x3B
-
-        # Wake up MPU6500
-        self.bus.write_byte_data(self.addr, self.PWR_MGMT_1, 0)
-
-        self.gyro_scale = 131.0
-        self.accel_scale = 16384.0
-
-        self.angle = 0.0
-        self.alpha = 0.98
-        self.dt = 0.01  # 10 ms loop time
-
-        self.last_time = time.time()
-
-    def read_raw_data(self, reg):
-        high = self.bus.read_byte_data(self.addr, reg)
-        low = self.bus.read_byte_data(self.addr, reg + 1)
-        value = (high << 8) | low
-        if value > 32768:
-            value -= 65536
-        return value
-
-    def get_yaw(self):
-        current_time = time.time()
-        dt = current_time - self.last_time
-        if dt <= 0:
-            dt = self.dt
-        self.last_time = current_time
-
-        # Gyro Z axis raw data
-        gz = self.read_raw_data(self.GYRO_XOUT_H + 4)  # GYRO_ZOUT_H
-        gz_rate = gz / self.gyro_scale  # degrees per second
-
-        # Integrate gyro
-        gyro_angle = self.angle + gz_rate * dt
-
-        # Accelerometer angle (yaw not directly measurable by accel, so fallback)
-        # Here we only use gyro since accel can't give yaw. Complementary filter mostly gyro integration.
-        self.angle = self.alpha * gyro_angle + (1 - self.alpha) * self.angle
-
-        return self.angle
+            print(f"Error getting yaw: {e}")
+            return self.yaw  # Return last known yaw so program can continue
 
 
 # ---------------- PID Motor Controller ----------------
