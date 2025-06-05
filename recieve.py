@@ -2,7 +2,7 @@ import zmq
 import json
 
 class ZMQArrowReceiver:
-    def __init__(self, pc_ip="192.168.1.100", port=5566):
+    def __init__(self, pc_ip="10.29.0.1", port=5566):
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.SUB)
         self.socket.connect(f"tcp://{pc_ip}:{port}")
