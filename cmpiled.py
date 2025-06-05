@@ -11,6 +11,64 @@ import math
 
 class ComplementaryFilterIMU:
     def __init__(self, bus_num=1, addr=0x68):
+        self.bus_num = bus_num
+        self.addr = addr
+        self.init_imu()
+
+        self.gyro_scale = 131.0
+        self.accel_scale = 16384.0
+
+        self.angle = 0.0
+        self.alpha = 0.98
+        self.dt = 0.01  # 10 ms loop time
+
+        self.last_time = time.time()
+
+    def init_imu(self):
+        try:
+            self.bus = smbus2.SMBus(self.bus_num)
+            # Wake up MPU6500
+            self.bus.write_byte_data(self.addr, 0x6B, 0)
+        except Exception as e:
+            print(f"[IMU INIT ERROR] {e}")
+            self.bus = None
+
+    def read_raw_data(self, reg):
+        if not self.bus:
+            raise IOError("I2C bus not initialized")
+        high = self.bus.read_byte_data(self.addr, reg)
+        low = self.bus.read_byte_data(self.addr, reg + 1)
+        value = (high << 8) | low
+        if value > 32768:
+            value -= 65536
+        return value
+
+    def get_yaw(self):
+        try:
+            current_time = time.time()
+            dt = current_time - self.last_time
+            if dt <= 0:
+                dt = self.dt
+            self.last_time = current_time
+
+            # Gyro Z axis raw data
+            gz = self.read_raw_data(0x43 + 4)  # GYRO_ZOUT_H = 0x47
+            gz_rate = gz / self.gyro_scale  # degrees per second
+
+            # Integrate gyro
+            gyro_angle = self.angle + gz_rate * dt
+
+            # Complementary filter (mostly gyro for yaw)
+            self.angle = self.alpha * gyro_angle + (1 - self.alpha) * self.angle
+
+            return self.angle
+        except Exception as e:
+            print(f"[IMU ERROR] {e}, attempting to reinitialize IMU...")
+            self.init_imu()
+            # On error, return last known angle to avoid crash
+            return self.angle
+
+    def __init__(self, bus_num=1, addr=0x68):
         self.bus = smbus2.SMBus(bus_num)
         self.addr = addr
         # MPU6500 registers
