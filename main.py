@@ -1,4 +1,4 @@
-from send_images import ZMQCameraClient
+from send_images import ZMQCameraPublisher
 
-camera= ZMQCameraClient()
+camera= ZMQCameraPublisher()
 camera.camera_sender() 

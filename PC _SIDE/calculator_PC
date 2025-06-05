@@ -1,0 +1,21 @@
+import zmq
+import cv2
+import numpy as np
+
+context = zmq.Context()
+socket = context.socket(zmq.SUB)
+socket.connect("tcp://10.29.15.54:5555")  # Replace with your Pi's IP here
+socket.setsockopt_string(zmq.SUBSCRIBE, '')  # Subscribe to all messages
+
+while True:
+    msg = socket.recv()
+    npimg = np.frombuffer(msg, dtype=np.uint8)
+    frame = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+
+    if frame is not None:
+        cv2.imshow("Camera Feed from Pi", frame)
+
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+cv2.destroyAllWindows()
