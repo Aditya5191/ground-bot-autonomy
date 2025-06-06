@@ -9,11 +9,11 @@ class ZMQArrowReceiver:
         self.socket = self.context.socket(zmq.SUB)
         self.socket.connect(f"tcp://{pc_ip}:{port}")
         self.socket.setsockopt_string(zmq.SUBSCRIBE, '')
-        print(f"Connected to tcp://{pc_ip}:{port} to receive arrow data")
 
         self.angle = None
         self.distance = None
         self.direction = None
+
         self.running = False
         self.thread = None
 
@@ -25,15 +25,16 @@ class ZMQArrowReceiver:
                 self.distance = msg.get("distance")
                 self.direction = msg.get("arrow_dir")
             except zmq.Again:
-                time.sleep(0.01)  # No data, sleep briefly to avoid CPU hogging
+                time.sleep(0.01)  # No data, wait a bit
             except Exception as e:
                 print("Error receiving arrow data:", e)
 
     def start(self):
-        self.running = True
-        self.thread = threading.Thread(target=self._listen_loop)
-        self.thread.daemon = True
-        self.thread.start()
+        if not self.running:
+            self.running = True
+            self.thread = threading.Thread(target=self._listen_loop)
+            self.thread.daemon = True
+            self.thread.start()
 
     def stop(self):
         self.running = False

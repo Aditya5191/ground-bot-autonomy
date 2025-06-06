@@ -33,9 +33,7 @@ if __name__=="__main__":
     try:
         while True:
             yaw=imu.yaw
-            distance = recv.distance
-            angle = recv.angle
-            direction = recv.direction
+            angle,distance,direction = recv.get_latest()
 
             print(f"yaw: {yaw}, distance: {distance}, angle: {angle}, direction: {direction}")
 
