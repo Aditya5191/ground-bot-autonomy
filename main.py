@@ -34,7 +34,7 @@ if __name__=="__main__":
     Kp = 4.0
     Ki = -0.1
     Kd = 0.03
-    RIGHT_PWM = 200
+    RIGHT_PWM = 150
     x=1
 
 
