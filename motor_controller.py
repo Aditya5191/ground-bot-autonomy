@@ -13,12 +13,12 @@ class Motor_ctrl:
 
     def turn_left(self):
         self.ser.write(bytes([0, 255]))
-        time.sleep(1.1)
+        time.sleep(0.9)
         self.stop()
 
     def turn_right(self):
         self.ser.write(bytes([255, 0]))
-        time.sleep(1.1)
+        time.sleep(0.9)
         self.stop()
     
     def stop(self):

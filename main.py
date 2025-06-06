@@ -84,6 +84,7 @@ if __name__=="__main__":
                         angle =  None
                         distance = None
                         imu.restart()
+                        time.sleep(2)
 
                     elif direction == "right":
                         print(f"[RIGHT] left: 225 right: 0")
@@ -92,6 +93,7 @@ if __name__=="__main__":
                         angle =  None
                         distance = None
                         imu.restart()
+                        time.sleep(2)
 
             time.sleep(dt)
 
