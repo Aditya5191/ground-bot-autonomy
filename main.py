@@ -35,6 +35,7 @@ if __name__=="__main__":
     Ki = -0.1
     Kd = 0.03
     RIGHT_PWM = 200
+    x=2
 
 
  #------------- main loop -----------------#
@@ -46,8 +47,8 @@ if __name__=="__main__":
 
             if direction == None and angle == None:
                 error = yaw
-                error_sum += error * dt
-                d_error = (error - last_error) / dt
+                error_sum += error * (dt*x)
+                d_error = (error - last_error) / (dt*x)
                 last_error = error
 
                 # PID control
@@ -63,8 +64,8 @@ if __name__=="__main__":
             elif distance != None and angle != None:
                 if not distance <=30:
                     error = angle
-                    error_sum += error * dt
-                    d_error = (error - last_error) / dt
+                    error_sum += error * (dt*x)
+                    d_error = (error - last_error) / (dt*x)
                     last_error = error
 
                     # PID control
@@ -80,18 +81,14 @@ if __name__=="__main__":
                     if direction == "left":
                         print(f"[LEFT] left: 0 right: 225")
                         motor.turn_left()
-                        direction = None
-                        angle =  None
-                        distance = None
+                        recv.set_latest(None,None,None)
                         imu.restart()
                         time.sleep(2)
 
                     elif direction == "right":
                         print(f"[RIGHT] left: 225 right: 0")
                         motor.turn_right()
-                        direction = None
-                        angle =  None
-                        distance = None
+                        recv.set_latest(None,None,None)
                         imu.restart()
                         time.sleep(2)
 

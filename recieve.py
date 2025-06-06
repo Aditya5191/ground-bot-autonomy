@@ -45,3 +45,9 @@ class ZMQArrowReceiver:
 
     def get_latest(self):
         return self.angle, self.distance, self.direction
+    
+    def set_latest(self, angle ,distance, direction):
+        self.angle = angle
+        self.distance = distance
+        self.direction = direction
+
