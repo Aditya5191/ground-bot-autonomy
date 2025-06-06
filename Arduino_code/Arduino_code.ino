@@ -1,17 +1,16 @@
-const int ENA = 3;  // Right motor PWM
-const int IN1 = 4;  // Right motor direction
-const int IN2 = 5;
+// Motor Pins
+const int ENA = 9;  // Left motor PWM
+const int IN1 = 6;
+const int IN2 = 7;
 
-const int ENB = 9;  // Left motor PWM
-const int IN3 = 7;  // Left motor direction
-const int IN4 = 6;
-
-String inputString = "";
-bool stringComplete = false;
+const int ENB = 3;  // Right motor PWM
+const int IN3 = 4;
+const int IN4 = 5;
 
 void setup() {
   Serial.begin(9600);
-
+  
+  // Setup motor pins
   pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
@@ -20,70 +19,25 @@ void setup() {
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
 
-  // Stop motors initially
-  analogWrite(ENA, 0);
-  analogWrite(ENB, 0);
+  // Set both motors to move forward
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
 }
 
 void loop() {
-  if (Serial.available()) {
-    char inChar = (char)Serial.read();
-    if (inChar == '\n') {
-      stringComplete = true;
-    } else {
-      inputString += inChar;
-    }
-  }
+  if (Serial.available() >= 2) {
+    int leftPWM = Serial.read();
+    int rightPWM = Serial.read();
 
-  if (stringComplete) {
-    // Expected format: "leftPWM,leftDir,rightPWM,rightDir\n"
-    int values[4] = {0, 0, 0, 0};
-    int valueIndex = 0;
-    int lastComma = -1;
-    int commaCount = 0;
+    analogWrite(ENA, leftPWM);
+    analogWrite(ENB, rightPWM);
 
-    for (int i = 0; i < inputString.length(); i++) {
-      if (inputString.charAt(i) == ',') {
-        String valStr = inputString.substring(lastComma + 1, i);
-        values[valueIndex] = valStr.toInt();
-        valueIndex++;
-        lastComma = i;
-        commaCount++;
-      }
-    }
-    // Last value after last comma
-    String valStr = inputString.substring(lastComma + 1);
-    values[valueIndex] = valStr.toInt();
-
-    if (commaCount == 3) {
-      int leftPWM = constrain(values[0], 0, 255);
-      int leftDir = values[1] == 0 ? 0 : 1;
-      int rightPWM = constrain(values[2], 0, 255);
-      int rightDir = values[3] == 0 ? 0 : 1;
-
-      // Control Left motor
-      if (leftDir == 1) {
-        digitalWrite(IN3, HIGH);
-        digitalWrite(IN4, LOW);
-      } else {
-        digitalWrite(IN3, LOW);
-        digitalWrite(IN4, HIGH);
-      }
-      analogWrite(ENB, leftPWM);
-
-      // Control Right motor
-      if (rightDir == 1) {
-        digitalWrite(IN1, HIGH);
-        digitalWrite(IN2, LOW);
-      } else {
-        digitalWrite(IN1, LOW);
-        digitalWrite(IN2, HIGH);
-      }
-      analogWrite(ENA, rightPWM);
-    }
-
-    // Reset input buffer
-    inputString = "";
-    stringComplete = false;
+    // Optional: Print for debugging
+    Serial.print("Left PWM: ");
+    Serial.print(leftPWM);
+    Serial.print(" | Right PWM: ");
+    Serial.println(rightPWM);
   }
 }
