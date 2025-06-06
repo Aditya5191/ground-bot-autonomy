@@ -18,7 +18,7 @@ class IMU:
             print(f"MPU init error: {e}")
             return False
 
-    def calib_mpu(self, samples=200):
+    def calib_mpu(self, samples=500):
         gyro_bias = 0.0
         print("Calibrating gyro... keep MPU still.")
 
