@@ -56,7 +56,7 @@ if __name__=="__main__":
                 # Adjust left motor based on yaw
                 left_pwm = int(RIGHT_PWM + control)
                 left_pwm = max(0, min(255, left_pwm))
-                motor.write_pwm(left_pwm,RIGHT_PWM)
+                motor.write_pwm(RIGHT_PWM,left_pwm)
                 print(f"[STRAIGHT] yaw: {yaw}, left: {left_pwm}, right: {RIGHT_PWM}")
 
 
