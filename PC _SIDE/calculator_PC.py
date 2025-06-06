@@ -68,7 +68,7 @@ while True:
             distance = get_distance(height)
             box_center = (x1 + x2) // 2
             frame_center = frame.shape[1] // 2
-            angle_offset = -(box_center - frame_center) * (60 / frame.shape[1])
+            angle_offset = (box_center - frame_center) * (60 / frame.shape[1])
 
             direction = "left" if label.lower() == "left" else "right"
 

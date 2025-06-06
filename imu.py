@@ -87,6 +87,10 @@ class IMU:
     def restart(self):
         self.stop()
         self.yaw=0.0
+        while not self.init_imu():
+            print("Retrying IMU...")
+            self.init_imu()
+            time.sleep(0.2)
         self.load_calibration()
         self.running = True
         self.thread = threading.Thread(target=self.yaw_loop)
