@@ -39,6 +39,8 @@ if __name__=="__main__":
             angle = recv.angle
             direction = recv.direction
 
+            print(f"yaw: {yaw}, distance: {distance}, angle: {angle}, direction: {direction}")
+
     except Exception as e:
         print(e)
         camera.stop()
