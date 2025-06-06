@@ -3,6 +3,7 @@ import time
 from imu import IMU 
 from send_images import ZMQCameraPublisher
 from recieve import ZMQArrowReceiver
+from motor_controller import Motor_ctrl
 
 PC_IP= "10.19.61.158"
 
@@ -13,6 +14,7 @@ if __name__=="__main__":
     imu = IMU()
     camera = ZMQCameraPublisher()
     recv = ZMQArrowReceiver(PC_IP)
+    motor = Motor_ctrl()
 
 
 
@@ -27,6 +29,12 @@ if __name__=="__main__":
 
  #----------- Variables ----------------#
     dt = 0.05
+    error_sum = 0.0
+    last_error = 0.0
+    Kp = 4.0
+    Ki = -0.1
+    Kd = 0.03
+    RIGHT_PWM = 200
 
 
  #------------- main loop -----------------#
@@ -34,8 +42,60 @@ if __name__=="__main__":
         while True:
             yaw=imu.yaw
             angle,distance,direction = recv.get_latest()
-
             print(f"yaw: {yaw}, distance: {distance}, angle: {angle}, direction: {direction}")
+
+            if direction == None and angle == None:
+                error = yaw
+                error_sum += error * dt
+                d_error = (error - last_error) / dt
+                last_error = error
+
+                # PID control
+                control = Kp * error + Ki * error_sum + Kd * d_error
+
+                # Adjust left motor based on yaw
+                left_pwm = int(RIGHT_PWM + control)
+                left_pwm = max(0, min(255, left_pwm))
+                motor.write_pwm(left_pwm,RIGHT_PWM)
+
+
+            elif distance != None and angle != None:
+                if not distance <=30:
+                    error = angle
+                    error_sum += error * dt
+                    d_error = (error - last_error) / dt
+                    last_error = error
+
+                    # PID control
+                    control = Kp * error + Ki * error_sum + Kd * d_error
+
+                    # Adjust left motor based on yaw
+                    left_pwm = int(RIGHT_PWM + control)
+                    left_pwm = max(0, min(255, left_pwm))
+                    motor.write_pwm(left_pwm,RIGHT_PWM)
+                    
+                else:
+                    if direction == "left":
+                        motor.turn_left()
+                        direction = None
+                        angle =  None
+                        distance = None
+                        imu.restart()
+
+                    elif direction == "right":
+                        motor.turn_right()
+                        direction = None
+                        angle =  None
+                        distance = None
+                        imu.restart()
+
+
+
+
+
+
+
+            time.sleep(dt)
 
     except Exception as e:
         print(e)

@@ -84,6 +84,15 @@ class IMU:
         self.thread.daemon = True
         self.thread.start()
 
+    def restart(self):
+        self.stop()
+        self.yaw=0.0
+        self.load_calibration()
+        self.running = True
+        self.thread = threading.Thread(target=self.yaw_loop)
+        self.thread.daemon = True
+        self.thread.start()
+
     def stop(self):
         self.running = False
         if self.thread:
