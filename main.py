@@ -33,7 +33,7 @@ if __name__=="__main__":
     last_error = 0.0
     Kp = 4.0
     Ki = -0.1
-    Kd = 0.03
+    Kd = 0.07
     RIGHT_PWM = 150
     x=1
 
