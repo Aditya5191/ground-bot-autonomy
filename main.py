@@ -4,7 +4,7 @@ from imu import IMU
 from send_images import ZMQCameraPublisher
 from recieve import ZMQArrowReceiver
 
-PC_IP= "10.19.0.1"
+PC_IP= "10.19.61.158"
 
 
 
