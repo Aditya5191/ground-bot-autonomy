@@ -2,6 +2,9 @@
 import time
 from imu import IMU 
 from send_images import ZMQCameraPublisher
+from recieve import ZMQArrowReceiver
+
+PC_IP= "10.19.0.1"
 
 
 
@@ -9,12 +12,15 @@ if __name__=="__main__":
  #---------- Innitialize Objects -----------#
     imu = IMU()
     camera = ZMQCameraPublisher()
+    recv = ZMQArrowReceiver()
 
 
 
 
  #---------- start the loops -----------#
-    
+    camera.start()
+    imu.start()
+    recv.start(PC_IP)
 
 
 
@@ -26,6 +32,16 @@ if __name__=="__main__":
 
 
  #------------- main loop -----------------#
+    try:
+        while True:
+            yaw=imu.yaw
+            distance = recv.distance
+            angle = recv.angle
+            direction = recv.direction
 
-
+    except Exception as e:
+        print(e)
+        camera.stop()
+        imu.stop()
+        recv.stop()
 
