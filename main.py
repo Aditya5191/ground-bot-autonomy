@@ -1,13 +1,12 @@
-
 import time
 from imu import IMU 
 from send_images import ZMQCameraPublisher
 from recieve import ZMQArrowReceiver
 from motor_controller import Motor_ctrl
+from datetime import datetime
+import csv
 
 PC_IP= "10.19.61.158"
-
-
 
 if __name__=="__main__":
  #---------- Innitialize Objects -----------#
@@ -16,27 +15,25 @@ if __name__=="__main__":
     recv = ZMQArrowReceiver(PC_IP)
     motor = Motor_ctrl()
 
-
-
-
  #---------- start the loops -----------#
     camera.start()
     imu.start()
     recv.start()
-
-
-
 
  #----------- Variables ----------------#
     dt = 0.05
     error_sum = 0.0
     last_error = 0.0
     Kp = 4.0
-    Ki = -0.1
+    Ki = 0.1
     Kd = 0.07
     RIGHT_PWM = 150
     x=1
 
+    # CSV logging setup
+    logfile = open("yaw_log.csv", "w", newline='')
+    csv_writer = csv.writer(logfile)
+    csv_writer.writerow(["Time", "Yaw", "Left_PWM", "Right_PWM"])
 
  #------------- main loop -----------------#
     try:
@@ -44,7 +41,6 @@ if __name__=="__main__":
             yaw=imu.yaw
             angle,distance,direction = recv.get_latest()
             
-
             if direction == None and angle == None:
                 error = yaw
                 error_sum += error * (dt*x)
@@ -58,8 +54,13 @@ if __name__=="__main__":
                 left_pwm = int(RIGHT_PWM + control)
                 left_pwm = max(0, min(255, left_pwm))
                 motor.write_pwm(left_pwm,RIGHT_PWM)
-                print(f"[STRAIGHT] yaw: {yaw}, left: {left_pwm}, right: {RIGHT_PWM}")
 
+                # Time in HH:MM:SS.mmm format
+                now = datetime.now()
+                timestamp = now.strftime("%H:%M:%S.%f")[:-3]
+
+                print(f"[STRAIGHT] {timestamp} yaw: {yaw}, left: {left_pwm}, right: {RIGHT_PWM}")
+                csv_writer.writerow([timestamp, round(yaw, 2), left_pwm, RIGHT_PWM])
 
             elif distance != None and angle != None:
                 if not distance <=30:
@@ -99,4 +100,4 @@ if __name__=="__main__":
         camera.stop()
         imu.stop()
         recv.stop()
-
+        logfile.close()
