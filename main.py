@@ -25,7 +25,7 @@ if __name__=="__main__":
     error_sum = 0.0
     last_error = 0.0
     Kp = 6.0
-    Ki = 2.0
+    Ki = 3.0
     Kd = 1.0
     RIGHT_PWM = 150
     x=1
