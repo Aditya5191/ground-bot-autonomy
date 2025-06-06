@@ -42,7 +42,7 @@ if __name__=="__main__":
         while True:
             yaw=imu.yaw
             angle,distance,direction = recv.get_latest()
-            print(f"yaw: {yaw}, distance: {distance}, angle: {angle}, direction: {direction}")
+            
 
             if direction == None and angle == None:
                 error = yaw
@@ -57,6 +57,7 @@ if __name__=="__main__":
                 left_pwm = int(RIGHT_PWM + control)
                 left_pwm = max(0, min(255, left_pwm))
                 motor.write_pwm(left_pwm,RIGHT_PWM)
+                print(f"[STRAIGHT] yaw: {yaw}, left: {left_pwm}, right: {RIGHT_PWM}")
 
 
             elif distance != None and angle != None:
@@ -69,13 +70,15 @@ if __name__=="__main__":
                     # PID control
                     control = Kp * error + Ki * error_sum + Kd * d_error
 
-                    # Adjust left motor based on yaw
+                    # Adjust left motor based on error
                     left_pwm = int(RIGHT_PWM + control)
                     left_pwm = max(0, min(255, left_pwm))
                     motor.write_pwm(left_pwm,RIGHT_PWM)
-                    
+                    print(f"[ALIGNING] angle: {angle}, left: {left_pwm}, right: {RIGHT_PWM}")
+
                 else:
                     if direction == "left":
+                        print(f"[LEFT] left: 0 right: 225")
                         motor.turn_left()
                         direction = None
                         angle =  None
@@ -83,17 +86,12 @@ if __name__=="__main__":
                         imu.restart()
 
                     elif direction == "right":
+                        print(f"[RIGHT] left: 225 right: 0")
                         motor.turn_right()
                         direction = None
                         angle =  None
                         distance = None
                         imu.restart()
-
-
-
-
-
-
 
             time.sleep(dt)
 
