@@ -12,7 +12,7 @@ if __name__=="__main__":
  #---------- Innitialize Objects -----------#
     imu = IMU()
     camera = ZMQCameraPublisher()
-    recv = ZMQArrowReceiver()
+    recv = ZMQArrowReceiver(PC_IP)
 
 
 
@@ -20,7 +20,7 @@ if __name__=="__main__":
  #---------- start the loops -----------#
     camera.start()
     imu.start()
-    recv.start(PC_IP)
+    recv.start()
 
 
 

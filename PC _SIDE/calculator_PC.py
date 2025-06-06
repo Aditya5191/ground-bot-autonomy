@@ -10,7 +10,7 @@ import json
 model = YOLO("C:/Users/adity/OneDrive/Desktop/ground bot autonomy/PC _SIDE/best.pt")
 
 # IP of the Raspberry Pi that is streaming frames
-pi_IP = "10.29.15.54"
+pi_IP = "10.19.59.214"
 
 # Calibration: heights vs distances
 X = np.array([154, 81, 47, 28, 24, 17, 18, 13, 12, 10]).reshape(-1, 1)
