@@ -26,8 +26,6 @@ if __name__=="__main__":
 
 
  #----------- Variables ----------------#
-    calib_data = imu.calib_mpu()
-    yaw = 0.0
     dt = 0.05
 
 
