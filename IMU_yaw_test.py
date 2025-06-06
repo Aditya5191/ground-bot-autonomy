@@ -6,7 +6,7 @@ MPU_ADDR = 0x68
 CALIB_FILE = "calib.json"
 
 class IMU:
-    def init_imu():
+    def init_imu(self):
         global bus
         try: 
             bus = SMBus(1)
@@ -44,7 +44,7 @@ class IMU:
                 print("Corrupted calibration. Recalibrating...")
         return self.calib_mpu()
 
-    def read(reg):
+    def read(self,reg):
         high = bus.read_byte_data(MPU_ADDR, reg)
         low = bus.read_byte_data(MPU_ADDR, reg+1)
         value = (high << 8) + low
