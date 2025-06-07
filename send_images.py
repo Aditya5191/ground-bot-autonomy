@@ -29,7 +29,7 @@ class ZMQCameraPublisher:
                 frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
                 _, buffer = cv2.imencode('.jpg', frame_bgr, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
                 self.socket.send(buffer.tobytes())
-                time.sleep(0.1)  # ~10 FPS
+                time.sleep(0.2)  # ~10 FPS
             except Exception as e:
                 print(f"Camera error: {e}")
                 break

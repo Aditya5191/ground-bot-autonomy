@@ -56,7 +56,7 @@ while True:
 
     for box in results.boxes:
         conf = float(box.conf[0])
-        if conf >= 0.6:
+        if conf >= 0.8:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             cls_id = int(box.cls[0])
             label = model.names[cls_id]
