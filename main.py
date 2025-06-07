@@ -80,7 +80,7 @@ if __name__=="__main__":
 
                 else:
                     if direction == "left":
-                        error = 90
+                        error = -90
                         while not error > -2 and error < 2:
                             error_sum += error * (dt)
                             d_error = (error - last_error) / (dt)
@@ -103,7 +103,7 @@ if __name__=="__main__":
                         time.sleep(2)
 
                     elif direction == "right":
-                        error = -90
+                        error = 90
                         while not error > -2 and error < 2:
                             error_sum += error * (dt)
                             d_error = (error - last_error) / (dt)
