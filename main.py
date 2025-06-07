@@ -118,7 +118,7 @@ if __name__=="__main__":
                             motor.write_pwm(left_pwm,RIGHT_PWM)
                             #reduce error every dt
                             error += imu.gyro_z *dt
-                            print(f"[LEFT] left: {left_pwm} right: {RIGHT_PWM}")
+                            print(f"[RIGHT] left: {left_pwm} right: {RIGHT_PWM}")
 
                         motor.stop()
                         recv.set_latest(None,None,None)
