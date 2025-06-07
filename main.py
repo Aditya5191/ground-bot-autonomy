@@ -80,15 +80,47 @@ if __name__=="__main__":
 
                 else:
                     if direction == "left":
-                        print(f"[LEFT] left: 0 right: 225")
-                        motor.turn_left()
+                        error = 90
+                        while not error > -2 and error < 2:
+                            error_sum += error * (dt)
+                            d_error = (error - last_error) / (dt)
+                            last_error = error
+
+                            # PID control
+                            control = Kp * error + Ki * error_sum + Kd * d_error
+
+                            # Adjust left motor based on error to turn left
+                            left_pwm = int(RIGHT_PWM + control)
+                            left_pwm = max(0, min(255, left_pwm))
+                            motor.write_pwm(left_pwm,RIGHT_PWM)
+                            # reduce error every dt
+                            error += imu.gyro_z *dt
+                            print(f"[LEFT] left: {left_pwm} right: {RIGHT_PWM}")
+
+                        motor.stop()                            
                         recv.set_latest(None,None,None)
                         imu.restart()
                         time.sleep(2)
 
                     elif direction == "right":
-                        print(f"[RIGHT] left: 225 right: 0")
-                        motor.turn_right()
+                        error = -90
+                        while not error > -2 and error < 2:
+                            error_sum += error * (dt)
+                            d_error = (error - last_error) / (dt)
+                            last_error = error
+
+                            # PID control
+                            control = Kp * error + Ki * error_sum + Kd * d_error
+
+                            # Adjust left motor based on error to turn right
+                            left_pwm = int(RIGHT_PWM + control)
+                            left_pwm = max(0, min(255, left_pwm))
+                            motor.write_pwm(left_pwm,RIGHT_PWM)
+                            #reduce error every dt
+                            error += imu.gyro_z *dt
+                            print(f"[LEFT] left: {left_pwm} right: {RIGHT_PWM}")
+
+                        motor.stop()
                         recv.set_latest(None,None,None)
                         imu.restart()
                         time.sleep(2)

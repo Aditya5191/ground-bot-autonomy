@@ -15,6 +15,7 @@ class IMU:
         self.bus = None
         self.gyro_bias = 0.0
         self.thread = None
+        self.gyro_z = None
 
     def init_imu(self):
         try:
@@ -60,8 +61,8 @@ class IMU:
         while self.running:
             try:
                 raw = self.read(0x47)
-                gyro_z = (raw - self.gyro_bias) / 131.0
-                self.yaw += gyro_z * self.dt
+                self.gyro_z = (raw - self.gyro_bias) / 131.0
+                self.yaw += self.gyro_z * self.dt
             except OSError as e:
                 print(f"I2C error: {e}, reconnecting...")
                 try:
